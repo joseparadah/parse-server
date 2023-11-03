@@ -144,7 +144,7 @@ export interface ParseServerOptions {
   allowCustomObjectId: ?boolean;
   /* Configuration for your authentication providers, as stringified JSON. See http://docs.parseplatform.org/parse-server/guide/#oauth-and-3rd-party-authentication
   :ENV: PARSE_SERVER_AUTH_PROVIDERS */
-  auth: ?(AuthAdapter[]);
+  auth: ?{ [string]: AuthAdapter };
   /* Max file size for uploads, defaults to 20mb
   :DEFAULT: 20mb */
   maxUploadSize: ?string;
@@ -242,6 +242,9 @@ export interface ParseServerOptions {
   cluster: ?NumberOrBoolean;
   /* middleware for express server, can be string or function */
   middleware: ?((() => void) | string);
+  /* The trust proxy settings. It is important to understand the exact setup of the reverse proxy, since this setting will trust values provided in the Parse Server API request. See the <a href="https://expressjs.com/en/guide/behind-proxies.html">express trust proxy settings</a> documentation. Defaults to `false`.
+  :DEFAULT: false */
+  trustProxy: ?any;
   /* Starts the liveQuery server */
   startLiveQueryServer: ?boolean;
   /* Live query server configuration options (will start the liveQuery server) */
@@ -497,6 +500,9 @@ export interface PasswordPolicyOptions {
 }
 
 export interface FileUploadOptions {
+  /* Sets the allowed file extensions for uploading files. The extension is defined as an array of file extensions, or a regex pattern.<br><br>It is recommended to restrict the file upload extensions as much as possible. HTML files are especially problematic as they may be used by an attacker who uploads a HTML form to look legitimate under your app's domain name, or to compromise the session token of another user via accessing the browser's local storage.<br><br>Defaults to `^[^hH][^tT][^mM][^lL]?$` which allows any file extension except HTML files.
+  :DEFAULT: ["^[^hH][^tT][^mM][^lL]?$"] */
+  fileExtensions: ?(string[]);
   /*  Is true if file upload should be allowed for anonymous users.
   :DEFAULT: false */
   enableForAnonymousUser: ?boolean;
