@@ -621,6 +621,9 @@ function transformTopLevelAtom(atom, field) {
       if (PolygonCoder.isValidJSON(atom)) {
         return PolygonCoder.JSONToDatabase(atom);
       }
+      if (NumberDecimalCoder.isValidJSON(atom)) {
+        return NumberDecimalCoder.JSONToDatabase(atom);
+      }
       if (FileCoder.isValidJSON(atom)) {
         return FileCoder.JSONToDatabase(atom);
       }
@@ -1048,6 +1051,10 @@ const nestedMongoObjectToNestedParseObject = mongoObject => {
         return mongoObject.value;
       }
 
+      if (mongoObject instanceof mongodb.Decimal128) {
+        return mongoObject.toString()
+      }
+
       if (BytesCoder.isValidDatabaseObject(mongoObject)) {
         return BytesCoder.databaseToJSON(mongoObject);
       }
@@ -1109,6 +1116,10 @@ const mongoObjectToParseObject = (className, mongoObject, schema) => {
 
       if (mongoObject instanceof mongodb.Double) {
         return mongoObject.value;
+      }
+
+      if (mongoObject instanceof mongodb.Decimal128) {
+        return mongoObject.toString()
       }
 
       if (BytesCoder.isValidDatabaseObject(mongoObject)) {
@@ -1246,6 +1257,14 @@ const mongoObjectToParseObject = (className, mongoObject, schema) => {
                 BytesCoder.isValidDatabaseObject(value)
               ) {
                 restObject[key] = BytesCoder.databaseToJSON(value);
+                break;
+              }
+              if (
+                schema.fields[key] &&
+                schema.fields[key].type === 'NumberDecimal' &&
+                NumberDecimalCoder.isValidDatabaseObject(value)
+              ) {
+                restObject[key] = NumberDecimalCoder.databaseToJSON(value);
                 break;
               }
             }
@@ -1402,6 +1421,27 @@ var PolygonCoder = {
     return typeof value === 'object' && value !== null && value.__type === 'Polygon';
   },
 };
+
+var NumberDecimalCoder = {
+  databaseToJSON(value) {
+    return {
+      __type: 'NumberDecimal',
+      value: value,
+    };
+  },
+
+  isValidDatabaseObject(object) {
+    return object instanceof mongodb.Decimal128
+  },
+
+  JSONToDatabase(json) {
+    return mongodb.Decimal128.fromString(json.value)
+  },
+
+  isValidJSON(value) {
+    return typeof value === 'object' && value !== null && value.__type === 'NumberDecimal';
+  },
+}
 
 var FileCoder = {
   databaseToJSON(object) {

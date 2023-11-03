@@ -122,6 +122,14 @@ module.exports.ParseServerOptions = {
     env: 'PARSE_SERVER_CLOUD',
     help: 'Full path to your cloud code main.js',
   },
+  moralisApiKey: {
+    env: 'MORALIS_API_KEY',
+    help: 'Moralis API Key',
+  },
+  streamsConfig: {
+    env: 'STREAMS_CONFIG',
+    help: 'Full path to your streams config',
+  },
   cluster: {
     env: 'PARSE_SERVER_CLUSTER',
     help: 'Run with cluster, optionally set the number of processes default to os.cpus().length',

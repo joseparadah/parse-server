@@ -80,6 +80,8 @@ class ParseServer {
     const { loggerController, databaseController, hooksController } = allControllers;
     this.config = Config.put(Object.assign({}, options, allControllers));
 
+    Parse.databaseController = databaseController;
+
     logging.setLogger(loggerController);
 
     // Note: Tests will start to fail if any validation happens after this is called.

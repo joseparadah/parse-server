@@ -36,6 +36,8 @@ function mongoFieldToParseSchemaField(type) {
       return { type: 'Bytes' };
     case 'polygon':
       return { type: 'Polygon' };
+    case 'numberdecimal':
+      return { type: 'NumberDecimal' };
   }
 }
 
@@ -143,6 +145,8 @@ function parseFieldTypeToMongoFieldType({ type, targetClass }) {
       return 'bytes';
     case 'Polygon':
       return 'polygon';
+    case 'NumberDecimal':
+      return 'numberdecimal';
   }
 }
 

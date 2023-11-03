@@ -458,6 +458,71 @@ class DatabaseController {
       });
   }
 
+  bulkWrite(className: string, writeOps: any) {
+    if (!writeOps[0]) return Promise.resolve([]);
+    return this.validateClassName(className)
+      .then(() => this.validateObject(className, writeOps[0].update, {}, {}))
+      .then(validSchemaController => this.loadSchemaIfNeeded(validSchemaController))
+      .then(schemaController => {
+        return Promise.resolve()
+          .then(() => schemaController.enforceClassExists(className))
+          .then(() => schemaController.getOneSchema(className, true))
+          .then(schema => this.adapter.bulkWrite(className, schema, writeOps));
+      });
+  }
+
+  bulkUpdate(className: string, writeOps: any) {
+    if (!writeOps[0]) return Promise.resolve([]);
+    return this.validateClassName(className)
+      .then(() => this.validateObject(className, writeOps[0].update, {}, {}))
+      .then(validSchemaController => this.loadSchemaIfNeeded(validSchemaController))
+      .then(schemaController => {
+        return Promise.resolve()
+          .then(() => schemaController.enforceClassExists(className))
+          .then(() => schemaController.getOneSchema(className, true))
+          .then(schema => this.adapter.bulkUpdate(className, schema, writeOps));
+      });
+  }
+
+  bulkUpdateMany(className: string, writeOps: any) {
+    if (!writeOps[0]) return Promise.resolve([]);
+    return this.validateClassName(className)
+      .then(() => this.validateObject(className, writeOps[0].update, {}, {}))
+      .then(validSchemaController => this.loadSchemaIfNeeded(validSchemaController))
+      .then(schemaController => {
+        return Promise.resolve()
+          .then(() => schemaController.enforceClassExists(className))
+          .then(() => schemaController.getOneSchema(className, true))
+          .then(schema => this.adapter.bulkUpdateMany(className, schema, writeOps));
+      });
+  }
+
+  bulkDelete(className: string, writeOps: any) {
+    if (!writeOps[0]) return Promise.resolve([]);
+    return this.validateClassName(className)
+      .then(() => this.validateObject(className, {}, {}, {}))
+      .then(validSchemaController => this.loadSchemaIfNeeded(validSchemaController))
+      .then(schemaController => {
+        return Promise.resolve()
+          .then(() => schemaController.enforceClassExists(className))
+          .then(() => schemaController.getOneSchema(className, true))
+          .then(schema => this.adapter.bulkDelete(className, schema, writeOps));
+      });
+  }
+
+  bulkDeleteMany(className: string, writeOps: any) {
+    if (!writeOps[0]) return Promise.resolve([]);
+    return this.validateClassName(className)
+      .then(() => this.validateObject(className, {}, {}, {}))
+      .then(validSchemaController => this.loadSchemaIfNeeded(validSchemaController))
+      .then(schemaController => {
+        return Promise.resolve()
+          .then(() => schemaController.enforceClassExists(className))
+          .then(() => schemaController.getOneSchema(className, true))
+          .then(schema => this.adapter.bulkDeleteMany(className, schema, writeOps));
+      });
+  }
+
   update(
     className: string,
     query: any,

@@ -1,6 +1,7 @@
 // @flow
 import MongoCollection from './MongoCollection';
 import MongoSchemaCollection from './MongoSchemaCollection';
+import { newObjectId } from '../../../cryptoUtils';
 import { StorageAdapter } from '../StorageAdapter';
 import type { SchemaType, QueryType, StorageClass, QueryOptions } from '../StorageAdapter';
 import { parse as parseUrl, format as formatUrl } from '../../../vendor/mongodbUrl';
@@ -651,6 +652,72 @@ export class MongoStorageAdapter implements StorageAdapter {
         return objects.map(object => mongoObjectToParseObject(className, object, schema));
       })
       .catch(err => this.handleError(err));
+  }
+
+  bulkWrite(className: string, schema: SchemaType, writeOps: any[]) {
+    const date = new Date()
+    return this._adaptiveCollection(className).then(collection =>
+      collection._mongoCollection.bulkWrite(writeOps.map(({ update }) => {
+        const mongoUpdate = transformUpdate(className, update, schema);
+        if (!mongoUpdate.$set) mongoUpdate.$set = {}
+        const document = Object.assign({
+          _id: newObjectId(24),
+          _created_at : date,
+          _updated_at : date
+        }, mongoUpdate.$set)
+        return { insertOne : { document }}
+      }), {ordered: false})
+    );
+  }
+
+  bulkUpdate(className: string, schema: SchemaType, writeOps: any[]) {
+    const date = new Date()
+    return this._adaptiveCollection(className).then(collection =>
+      collection._mongoCollection.bulkWrite(writeOps.map(({ filter, update, ...rest }) => {
+        const mongoWhere = transformWhere(className, filter, schema);
+        const mongoUpdate = transformUpdate(className, update, schema);
+        if (!mongoUpdate.$setOnInsert) mongoUpdate.$setOnInsert = {}
+        if (!mongoUpdate.$set) mongoUpdate.$set = {}
+        mongoUpdate.$setOnInsert._created_at = date;
+        mongoUpdate.$setOnInsert._id = newObjectId(24);
+        mongoUpdate.$set._updated_at = date;
+        return { updateOne: Object.assign({}, rest, { filter: mongoWhere, update: mongoUpdate }) }
+      }), {ordered: false})
+    );
+  }
+
+  bulkUpdateMany(className: string, schema: SchemaType, writeOps: any[]) {
+    const date = new Date()
+    return this._adaptiveCollection(className).then(collection =>
+      collection._mongoCollection.bulkWrite(writeOps.map(({ filter, update, ...rest }) => {
+        const mongoWhere = transformWhere(className, filter, schema);
+        const mongoUpdate = transformUpdate(className, update, schema);
+        if (!mongoUpdate.$setOnInsert) mongoUpdate.$setOnInsert = {}
+        if (!mongoUpdate.$set) mongoUpdate.$set = {}
+        mongoUpdate.$setOnInsert._created_at = date;
+        mongoUpdate.$setOnInsert._id = newObjectId(24);
+        mongoUpdate.$set._updated_at = date;
+        return { updateMany: Object.assign({}, rest, { filter: mongoWhere, update: mongoUpdate }) }
+      }), {ordered: false})
+    );
+  }
+
+  bulkDelete(className: string, schema: SchemaType, writeOps: any[]) {
+    return this._adaptiveCollection(className).then(collection =>
+      collection._mongoCollection.bulkWrite(writeOps.map(({ filter, update, ...rest }) => {
+        const mongoWhere = transformWhere(className, filter, schema);
+        return { deleteOne: { filter: mongoWhere } }
+      }), {ordered: false})
+    );
+  }
+
+  bulkDeleteMany(className: string, schema: SchemaType, writeOps: any[]) {
+    return this._adaptiveCollection(className).then(collection =>
+      collection._mongoCollection.bulkWrite(writeOps.map(({ filter, update, ...rest }) => {
+        const mongoWhere = transformWhere(className, filter, schema);
+        return { deleteMany: { filter: mongoWhere } }
+      }), {ordered: false})
+    );
   }
 
   ensureIndex(

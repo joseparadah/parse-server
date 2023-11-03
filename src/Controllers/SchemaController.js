@@ -1564,6 +1564,11 @@ function getObjectType(obj): ?(SchemaField | string) {
           return 'Polygon';
         }
         break;
+      case 'NumberDecimal':
+        if (obj.value) {
+          return 'NumberDecimal'
+        }
+        break;
     }
     throw new Parse.Error(Parse.Error.INCORRECT_TYPE, 'This is not a valid ' + obj.__type);
   }

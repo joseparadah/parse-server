@@ -96,6 +96,10 @@ export interface ParseServerOptions {
   databaseAdapter: ?Adapter<StorageAdapter>;
   /* Full path to your cloud code main.js */
   cloud: ?string;
+  /* Moralis Api Key */
+  moralisApiKey: ?string;
+  /* Path to streams configuration file  */
+  streamsConfig: ?String;
   /* A collection prefix for the classes
   :DEFAULT: '' */
   collectionPrefix: ?string;
