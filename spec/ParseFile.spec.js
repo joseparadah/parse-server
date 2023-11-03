@@ -372,7 +372,6 @@ describe('Parse.File testing', () => {
         url: 'http://localhost:8378/1/files/file',
         body: 'fee fi fo',
       });
-
       const b = response.data;
       expect(b.name).toMatch(/\.html$/);
       response = await request({ url: b.url });
@@ -1318,7 +1317,6 @@ describe('Parse.File testing', () => {
   describe('fileExtensions', () => {
     it('works with _ContentType', async () => {
       await reconfigureServer({
-        silent: false,
         fileUpload: {
           enableForPublic: true,
           fileExtensions: ['png'],

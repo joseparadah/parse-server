@@ -8,7 +8,7 @@ const classesWithMasterOnlyAccess = [
 ];
 // Disallowing access to the _Role collection except by master key
 function enforceRoleSecurity(method, className, auth) {
-  if (className === '_Installation' && !auth.isMaster) {
+  if (className === '_Installation' && !auth.isMaster && !auth.isMaintenance) {
     if (method === 'delete' || method === 'find') {
       const error = `Clients aren't allowed to perform the ${method} operation on the installation collection.`;
       throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, error);
@@ -16,7 +16,11 @@ function enforceRoleSecurity(method, className, auth) {
   }
 
   //all volatileClasses are masterKey only
-  if (classesWithMasterOnlyAccess.indexOf(className) >= 0 && !auth.isMaster) {
+  if (
+    classesWithMasterOnlyAccess.indexOf(className) >= 0 &&
+    !auth.isMaster &&
+    !auth.isMaintenance
+  ) {
     const error = `Clients aren't allowed to perform the ${method} operation on the ${className} collection.`;
     throw new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, error);
   }

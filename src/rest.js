@@ -86,7 +86,7 @@ function del(config, auth, className, objectId, context) {
           if (response && response.results && response.results.length) {
             const firstResult = response.results[0];
             firstResult.className = className;
-            if (className === '_Session' && !auth.isMaster) {
+            if (className === '_Session' && !auth.isMaster && !auth.isMaintenance) {
               if (!auth.user || firstResult.user.objectId !== auth.user.id) {
                 throw new Parse.Error(Parse.Error.INVALID_SESSION_TOKEN, 'Invalid session token');
               }
@@ -109,7 +109,7 @@ function del(config, auth, className, objectId, context) {
       return Promise.resolve({});
     })
     .then(() => {
-      if (!auth.isMaster) {
+      if (!auth.isMaster && !auth.isMaintenance) {
         return auth.getUserRoles();
       } else {
         return;
@@ -119,7 +119,7 @@ function del(config, auth, className, objectId, context) {
     .then(s => {
       schemaController = s;
       const options = {};
-      if (!auth.isMaster) {
+      if (!auth.isMaster && !auth.isMaintenance) {
         options.acl = ['*'];
         if (auth.user) {
           options.acl.push(auth.user.id);
@@ -213,7 +213,12 @@ function update(config, auth, className, restWhere, restObject, clientSDK, conte
 
 function handleSessionMissingError(error, className, auth) {
   // If we're trying to update a user without / with bad session token
-  if (className === '_User' && error.code === Parse.Error.OBJECT_NOT_FOUND && !auth.isMaster) {
+  if (
+    className === '_User' &&
+    error.code === Parse.Error.OBJECT_NOT_FOUND &&
+    !auth.isMaster &&
+    !auth.isMaintenance
+  ) {
     throw new Parse.Error(Parse.Error.SESSION_MISSING, 'Insufficient auth.');
   }
   throw error;

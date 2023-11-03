@@ -24,11 +24,11 @@ const templates = {
 async function config() {
 
   // Get branch
-  const branch = ref.split('/').pop();
+  const branch = ref.split('/').pop().split('-')[0];
   console.log(`Running on branch: ${branch}`);
 
   // Set changelog file
-  const changelogFile = `./changelogs/CHANGELOG_release.md`;
+  const changelogFile = `./changelogs/CHANGELOG_${branch}.md`;
   console.log(`Changelog file output to: ${changelogFile}`);
 
   // Load template file contents
@@ -40,8 +40,8 @@ async function config() {
       { name: 'alpha', prerelease: true },
       { name: 'beta', prerelease: true },
       'next-major',
-      // Long-Term-Support branches
-      { name: 'release-5.x.x', range: '5.x.x', channel: '5.x.x' },
+      // Long-Term-Support branches; defined as GLOB pattern
+      'release-+([0-9]).x.x',
     ],
     dryRun: false,
     debug: true,
@@ -85,6 +85,16 @@ async function config() {
         labels: ['type:ci'],
         releasedLabels: ['state:released<%= nextRelease.channel ? `-\${nextRelease.channel}` : "" %>']
       }],
+      // Back-merge module runs last because if it fails it should not impede the release process
+      [
+        "@saithodev/semantic-release-backmerge",
+        {
+          "branches": [
+            { from: "beta", to: "alpha" },
+            { from: "release", to: "beta" },
+          ]
+        }
+      ],
     ],
   };
 

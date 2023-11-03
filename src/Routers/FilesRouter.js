@@ -53,12 +53,14 @@ export class FilesRouter {
         limit: maxUploadSize,
       }), // Allow uploads without Content-Type, or with any Content-Type.
       Middlewares.handleParseHeaders,
+      Middlewares.handleParseSession,
       this.createHandler
     );
 
     router.delete(
       '/files/:filename',
       Middlewares.handleParseHeaders,
+      Middlewares.handleParseSession,
       Middlewares.enforceMasterKeyAccess,
       this.deleteHandler
     );
@@ -174,7 +176,6 @@ export class FilesRouter {
     const file = new Parse.File(filename, { base64 }, contentType);
     const { metadata = {}, tags = {} } = req.fileData || {};
     try {
-      // Scan request data for denied keywords
       Utils.checkProhibitedKeywords(config, metadata);
       Utils.checkProhibitedKeywords(config, tags);
     } catch (error) {
